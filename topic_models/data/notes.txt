@@ -1,0 +1,5 @@
+These files are exported from the R phyloseq object MM_16S_phy, which has been
+subjected to abundance/occurance based filtering and relative abundance
+transformation. Uploaded 09/14/20 by Sean.
+
+Also uploaded raw counts tables of culled dataset. These were filtered to ASVs that occur at a certain frequency (like the final dataset) but have not been subsampled or relative abundance transformed.

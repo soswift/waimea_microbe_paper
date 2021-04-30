@@ -1,0 +1,171 @@
+---
+title: "Microbial Mapping - Data Import and Clean"
+output:
+  html_document:
+    df_print: paged
+---
+
+# Document Summary
+This code is for importing and cleaning outputs from the HPC metaflowmics pipeline.
+Pipeline output files are read in, written out as cleaned flat files, and read back in to create a phyloseq object.
+
+
+```{r}
+library(data.table)
+library(phyloseq)
+# if(getwd() != "/home/sean/Documents/Bioinformatics/Projects/Waimea/microbial_mapping/main")
+#   {
+# setwd("/home/sean/Documents/Bioinformatics/Projects/Waimea/microbial_mapping/main")
+# }
+
+```
+
+
+
+## Read In and Join Metadata
+Use data.table package to read in and clean metadata.
+pipeline output data files for 16s and its
+
+
+```{r}
+# sample metadata
+raw_samples  <- fread("../data/processed/interim/unique_waimea_hiseq_samples_emp_spatial.tsv",
+                      sep = "\t", header = T)
+
+# library prep metadata
+prep_16s <- fread("../data/raw/sample/combined_hiseqs_bioblitz_mapping - 16S_prep_info.tsv",
+                  sep = "\t", header = T)
+
+prep_its <- fread("../data/raw/sample/combined_hiseqs_bioblitz_mapping - ITS_prep_info.tsv",
+                  sep = "\t", header = T)
+
+# joined prep and sample metadata
+meta_16s <- merge(prep_16s, raw_samples, all.x=T)
+meta_its <- merge(prep_its, raw_samples, all.x=T)
+
+meta_all <-rbindlist(list(meta_16s,meta_its))
+
+fwrite(meta_16s,"../data/processed/interim/combined_prep_sample_metadata_16s.csv")
+fwrite(meta_its,"../data/processed/interim/combined_prep_sample_metadata_its.csv")
+fwrite(meta_all,"../data/processed/interim/combined_prep_sample_metadata_16sandits.csv")
+
+# 16s data
+abund_16s_file <- "../data/raw/sequence/waimea_16S_v1/abundance_table_100.shared"
+tax_16s_file  <- "../data/raw/sequence/waimea_16S_v1/annotations_100.taxonomy"
+meta_16s_file <- "../data/processed/interim/combined_prep_sample_metadata_16s.csv"
+
+
+# its data
+
+abund_its_file <- "../data/raw/sequence/waimea_ITS_v1/Results/abundance_table_100.tsv"
+tax_its_file   <- "../data/raw/sequence/waimea_ITS_v1/Results/annotations_sintax_100.tsv"
+meta_its_file  <- "../data/processed/interim/combined_prep_sample_metadata_its.csv"
+
+```
+
+
+
+## Clean data
+Source function for creating phyloseq objects from standard hpc output.
+The function will read in files, clean them, organize them as a list and write out each component (abundance, taxonony, metadata) as a csv file. 
+
+```{r}
+source("../src/clean_and_query_16S.R")
+
+
+## clean_16s_tables outputs a list of cleaned versions of each dataframe
+## 'cleaning' means renaming some columns and generally tidying the pipeline outputs
+## sequences are not affected
+## names are checked to make sure they agree between all files
+## the function writes out each cleaned file as a csv
+
+mm_16s <- clean_16S_tables(
+                  abundance_file = abund_16s_file,
+                  taxonomy_file = tax_16s_file,
+                  metadata_file = meta_16s_file,
+                  description = "mm_16s_hiseqs",
+                  output_dir = "../data/processed/cleaned",
+                  id_column = "sequencing_id",
+                  cull = list(min.num = 3, min.abund = 0.001, min.single.abund = 0.01)
+                  )
+
+                
+abund<- mm_16s[["abundance"]]
+
+object.size(transpose(abund)) %>% print(units = "GB")
+
+
+# write out the list of dataframes as r object
+saveRDS(mm_16s, file = "../data/processed/cleaned/mm_16s.rds")
+
+# remove variable
+rm(mm_16s)
+gc()
+
+```
+
+## Create Phyloseq Object
+The function takes the csv files written out above. Each file is read in, re-organized for phyloseq object, and finally a phyloseq object is created.
+
+### 16S Phyloseq
+Make a phyloseq object for downstream analysis and filtering.
+Do some basic filtering based on OTU taxa and sample data.
+
+Peform subsampling and relative abundance transformation.
+
+Simplify trophic information
+
+```{r}
+# make phyloseq object
+source("../src/make_phyloseq.R")
+
+MM_16S_phy <- make_phyloseq(abund_file  = "../data/processed/cleaned/mm_16s_hiseqs_abundance_table.csv",
+                            tax_file    = "../data/processed/cleaned/mm_16s_hiseqs_taxonomy_table.csv",
+                            meta_file   = "../data/processed/cleaned/mm_16s_hiseqs_metadata_table.csv",
+                            id_column   = "sequencing_id")
+
+ntaxa(MM_16S_phy)
+
+
+# filter taxa
+MM_16S_phy <- subset_taxa(MM_16S_phy, (order!="Chloroplast") &
+                                         (kingdom != "Archaea") &
+                                         (family != "Mitochondria") &
+                                         (kingdom != "Unknown"))
+
+MM_16S_phy@sam_data$trophic[!MM_16S_phy@sam_data$trophic %in% c("PrimaryProducer", "E")]
+                                      
+# filter out empty samples
+MM_16S_phy <- prune_samples(sample_sums(MM_16S_phy) != 0, MM_16S_phy)
+
+# filter by project
+MM_16S_phy <- subset_samples( MM_16S_phy, project_name %in% c("Keck","JoshMS"))
+
+hist(sample_sums(MM_16S_phy)[sample_sums(MM_16S_phy) <50000], breaks = 30)
+
+
+# subsample to even depth
+MM_16S_phy <- rarefy_even_depth(MM_16S_phy,
+                                    rngseed = 1,
+                                    sample.size = 10000,
+                                    replace = F)
+# write out counts 
+saveRDS(MM_16S_phy, "../data/processed/cleaned/MM_16S_phy_counts.rds")
+
+# relativize abundance data
+MM_16S_phy <-  transform_sample_counts(MM_16S_phy, function(x) x / sum(x))
+
+# write out phyloseq
+saveRDS(MM_16S_phy, "../data/processed/cleaned/MM_16S_phy.rds")
+
+
+write.csv(sample_data(MM_16S_phy), "../data/processed/cleaned/rel_abund_MM_16S_sample_data.csv")
+
+write.csv(otu_table(MM_16S_phy), "../data/processed/cleaned/rel_abund_MM_16S_otu_table.csv")
+
+write.csv(tax_table(MM_16S_phy), "../data/processed/cleaned/rel_abund_MM16S_taxonomy.csv")
+
+# remove phyloseq object
+rm(MM_16S_phy)
+
+```

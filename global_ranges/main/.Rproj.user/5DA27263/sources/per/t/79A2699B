@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1595015223868.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "79A2699B",
+    "lastKnownWriteTime" : 1594952366,
+    "last_content_update" : 1595015223868,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "DB82B9AF",
+        "caption" : "otus_merge",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=otus_merge&cache_key=DB82B9AF",
+        "displayedObservations" : 10,
+        "environment" : "",
+        "object" : "otus_merge",
+        "preview" : 0,
+        "totalObservations" : 10,
+        "variables" : 168
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

@@ -1,0 +1,4 @@
+"0","# sample counts of each type by habitat"
+"0","samples[ ,"
+"0","         .N,"
+"0","         by= .(habitat)]"

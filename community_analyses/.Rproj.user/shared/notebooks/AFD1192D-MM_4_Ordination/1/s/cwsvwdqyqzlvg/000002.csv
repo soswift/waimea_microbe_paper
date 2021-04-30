@@ -1,0 +1,13 @@
+"0","library(ggplot2)
+library(ggpubr)
+"
+"2","Registered S3 method overwritten by 'data.table':
+  method           from
+  print.data.table     
+"
+"0","library(phyloseq)"
+"2","multiple methods tables found for ‘type’"
+"0","library(data.table)"
+"2","data.table 1.14.0 using 4 threads (see ?getDTthreads).  Latest news: r-datatable.com
+"
+"0","library(viridisLite)"

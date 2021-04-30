@@ -1,0 +1,15 @@
+Dataset,empo_3,sample_count,read_sum
+EMP,Animal distal gut,3,21364
+EMP,Animal secretion,1,10
+EMP,Animal surface,2,45267
+EMP,Sediment (saline),1,4096
+EMP,Soil (non-saline),5,20261
+EMP,Surface (non-saline),1,116
+EMP,Water (non-saline),7,67317
+EMP,Water (saline),1,2258
+EMP,unknown,2,31203
+Waimea,Animal corpus,13,1308613
+Waimea,Plant corpus,8,421823
+Waimea,Plant rhizosphere,4,286944
+Waimea,Surface (non-saline),8,288385
+Waimea,Surface (saline),4,44944

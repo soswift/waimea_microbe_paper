@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1615227958570.000,
+    "dirty" : true,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1467677161",
+    "id" : "9A16244C",
+    "lastKnownWriteTime" : 1617762283,
+    "last_content_update" : 1617762299474,
+    "path" : "~/Documents/Bioinformatics/Projects/Waimea/16Sglobal/main/asv_range/ASV_Plot.R",
+    "project_path" : "asv_range/ASV_Plot.R",
+    "properties" : {
+        "cursorPosition" : "88,35",
+        "marks" : "<:88,34\n>:88,35",
+        "scrollLine" : "78"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

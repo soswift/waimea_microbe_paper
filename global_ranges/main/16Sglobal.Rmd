@@ -1,0 +1,136 @@
+---
+title: "Global 16S - R Notebook"
+output: html_notebook
+---
+# Summary
+This notebook is working wtih qiita outputs (qiime2) for 16S data.
+In practice, this means importing biom format (HDF5) files into R, which can be resource intensive and tricky.
+
+There are two data sets available:
+  - Waimea 16S data
+      This data only includes samples from waimea valley and was processed following EMP guidelines
+  - Global EMP 16S data
+      This data includes the full EMP 90bp dataset, along with waimea samples
+
+## Data cleaning
+
+### Subset OTUs
+Since we are focused on comparing waimea samples to the global data set, we can cut down the ESVs to just those present in Waimea
+First, importthe waimea dataset and write out the list of ESVs to subset to.
+
+```{r}
+library(biomformat)
+library(dplyr)
+library(data.table)
+
+# read in waimea 16S biom
+wai_16S <- read_hdf5_biom("../data/biom/94580_reference-hit.biom")
+
+# pull out feature ids
+esv_ids <-unique(rapply(wai_16S$rows, function(x) head(x, 1)))
+
+# write out as text file
+writeLines(esv_ids, "../data/processed/esvs_to_keep.txt")
+
+```
+
+Next, subset the esvs using a qiime1 script. 
+By using the qiime script, we can avoid reading the whole EMP dataset into memory and can run on the HPC
+
+The script is called filter_otus_from_otu_table.py: http://qiime.org/scripts/filter_otus_from_otu_table.html
+
+```{bash eval=FAlSE }
+
+filter_otus_from_otu_table.py -i ../biom/30272_analysis_16S_DeblurReferencephylogenyforSEPPGreengenes138BIOMreferencehitbiomTrimminglength90_insertion_filter.biom -o global16S_subset.biom --negate_ids_to_exclude --otu_ids_to_exclude_fp esvs_to_keep.txt
+
+```
+
+### Subset Taxonomy To Match
+Now that we have fewer OTUs, we also need a matching taxonomy file.
+The taxonomy file from Qiita can be downloaded as a TSV or included in the BIOM file.
+
+Since it's easier to work with, let's just use the TSV file.
+
+```{r}
+full_taxonomy <- fread("../data/biom/94706_taxonomy.tsv")
+
+wai_taxonomy  <- full_taxonomy[`Feature ID` %in% esv_ids]
+
+fwrite("../data/processed/global_16S_subset_tax.tsv", sep = "\t")
+
+```
+
+
+### Converting OTU table from BIOM to TSV
+
+```{bash eval=FALSE}
+# pull out otu table
+biom convert -i global16S_subset.biom -o global16S_subset_temp.tsv --to-tsv
+
+
+```
+
+### Cleaning Metadata TSV
+At this point, we should have a clean biom file with otus.
+We still need to clean up the metadata though! When converting to tsv, you can specify metadata columns that you want to write out separately.
+However, we have a separate metadata file and taxonomy file anyways so there's no need.
+The metadata has hundreds of columns from all the different studies.
+We only need a few of these columns for our study.
+
+We can't read the metadata into R or excel because some of the columns are corrupted (e.g. end of line characters in strings ('\n').
+However, bash has some useful tools that seem capable of avoiding these problems.
+
+```{bash eval=F}
+
+# cleaning global 16S metadata
+# I think there is corruption in the metadata. 
+# We don't need all these columns, so try cutting out the ones we don't need.
+
+# 1) pull out column names from global dataset and arrange one on each line with line number pre-pended
+head -n 1 30272_30272_analysis_mapping.txt | sed 's/\t/\n/g' | nl > global_cols.txt
+
+
+# 2) pull out column names from waimea dataset
+head -n 1 13115_prep_9095_qiime_20200618-140936.txt | sed 's/\t/\n/g' > waimea_cols.txt
+
+# 3) find exact name matches using join program
+
+join -1 2 -2 1 <(sort -k 2 global_cols.txt) <(sort waimea_cols.txt)  > col_key.txt
+
+# 4) print out comma separated string of line numbers to pass to cut
+cols=$(sed -e 's/.*\s//g' col_key.txt | tr '\n' ',')
+
+# cols =
+# 1,2,3,162,165,168,172,278,279,280,285,286,288,292,293,314,320,356,364,
+# 366,381,407,442,445,463,479,483,493,511,590,731,738,770,793,817,820,822,855,889,968,1040
+
+# 5) cut those columns out of the tsv file
+cut -f "$cols global16S_mapping_file.tsv > clean_map_global16S.tsv
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+

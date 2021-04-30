@@ -1,0 +1,26 @@
+"0","p6 <-
+    plot_ordination(MM_16S_phy,
+                  MM.ord,
+                  type = ""samples"",
+                  color = ""site_name"",
+                  shape = ""habitat"") +
+  scale_shape_discrete(solid = T) 
+  
+  ggtitle(""Site"")
+"
+"1","$title
+"
+"1","[1]"
+"1"," ""Site"""
+"1","
+"
+"1","
+"
+"1","attr(,""class"")"
+"1","
+"
+"1","[1]"
+"1"," ""labels"""
+"1","
+"
+"0","p6"

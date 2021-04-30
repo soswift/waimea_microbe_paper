@@ -1,0 +1,43 @@
+"0","```r
+library(dplyr)
+```"
+"1","
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:data.table’:
+
+    between, first, last
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+"
+"0","```r
+library(ggplot2)
+library(data.table)
+# set ggplot theme
+theme_set(theme_bw())
+# set color palettes 
+pal_d = \"Spectral\"
+scale_colour_discrete <-  function(palname=pal_d, ...){
+  scale_colour_brewer(palette=palname, ...)
+}
+scale_fill_discrete <-  function(palname=pal_d, ...){
+    scale_fill_brewer(palette=palname, ...)
+}
+pal_c = \"C\"
+uniform_gradient_color <- function(palname = pal_c){
+  scale_color_viridis_c(option = palname)
+}
+source(\"../src/get_colors.R\")
+trophic_colors <- get_waimea_colors(return_all = T,
+                                    cat_type = \"trophic\")
+habitat_colors <- get_waimea_colors(return_all = T,
+                                    cat_type = \"habitat\")
+emp_colors     <- get_waimea_colors(return_all = T,
+                                    cat_type = \"emp\") 
+```"

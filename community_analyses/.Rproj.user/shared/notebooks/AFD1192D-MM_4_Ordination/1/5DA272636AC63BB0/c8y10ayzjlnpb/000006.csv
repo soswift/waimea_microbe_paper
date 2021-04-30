@@ -1,0 +1,11 @@
+"0","library(ggplot2)"
+"0","library(ggpubr)"
+"0","library(phyloseq)"
+"0","library(data.table)"
+"0","library(viridisLite)"
+"0","library(vegan)"
+"0","library(parallel)"
+"0","library(RVAideMemoire)"
+"2","Error in library(RVAideMemoire) : 
+  there is no package called ‘RVAideMemoire’
+"

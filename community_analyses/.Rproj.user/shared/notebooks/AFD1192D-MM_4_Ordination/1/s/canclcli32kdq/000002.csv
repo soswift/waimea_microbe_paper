@@ -1,0 +1,4 @@
+"0","metadata <- as(sample_data(MM_16S_phy), ""data.frame"")"
+"0","all_dist <- distance(MM_16S_phy, method=""bray"")"
+"2","
+"

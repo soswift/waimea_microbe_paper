@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1616017315003.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3295309755",
+    "id" : "7D73D6DD",
+    "lastKnownWriteTime" : 1617145414,
+    "last_content_update" : 1617308214250,
+    "path" : "~/Documents/Bioinformatics/Projects/Waimea/microbial_mapping/main/MM_6_Heatmap.Rmd",
+    "project_path" : "MM_6_Heatmap.Rmd",
+    "properties" : {
+        "chunk_output_type" : "inline",
+        "cursorPosition" : "319,21",
+        "marks" : "<:0,0\n>:0,0",
+        "scrollLine" : "307",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

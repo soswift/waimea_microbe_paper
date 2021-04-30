@@ -1,0 +1,365 @@
+---
+title: "Microbial Mapping - Heatmaps"
+output:
+  html_document:
+    df_print: paged
+---
+
+# Document Summary
+This code is for generating heatmaps from the waimea hiseq data sets.
+The goal is to visualize nestedness of taxa across trophic levels, sample types, habitats, elevation.
+
+
+## Set Up Environment
+Set a standardized color palettes for plotting and load libraries
+
+
+```{r}
+library(data.table)
+library(phyloseq)
+library(speedyseq)
+library(vegan)
+library(ComplexHeatmap)
+library(dendextend)
+library(dendsort)
+library(viridisLite)
+library(circlize)
+
+library(dynamicTreeCut)
+
+source("../src/get_colors.R")
+
+emp_colors <- get_waimea_colors()
+
+set.seed(2020)
+
+```
+
+## Read in data
+Read in the phyloseq object used with other analyses (culled, subsampled, relative abundance).
+
+
+```{r}
+# standard phyloseq object containing CMAIKI pipeline data
+MM_16S_phy <- readRDS("../data/processed/cleaned/MM_16S_phy.rds")
+
+# simplify trophic levels to Environmental, PrimaryProducer, and Consumer
+sample_data(MM_16S_phy)$trophic[!(sample_data(MM_16S_phy)$trophic %in%
+                                    c("Environmental", "PrimaryProducer"))] <- "Consumer"
+
+
+# pull out OTU data and hellinger transform
+all_otus <- t(as(otu_table(MM_16S_phy), "matrix"))
+all_otus <- decostand(all_otus, method = "hellinger")
+
+# pull out metadata
+all_meta <- as(sample_data(MM_16S_phy), "data.frame")
+
+# pull out taxonomy
+all_tax <- as.data.frame(MM_16S_phy@tax_table@.Data)
+all_tax$asv_name <- row.names(all_tax)
+
+# make list of habitats
+habitat_list <- unique(all_meta$habitat)
+
+```
+
+
+## Group by trophic for nestedness heatmap
+Reorder columns and rows to show nestedness
+
+```{r}
+
+# A helper function for generating heatmaps
+
+merge_by_group <- function(phyloseq_obj, group){
+  # merge samples by a group, summing read acounts
+  group_phy <- merge_samples(phyloseq_obj, group, fun = sum)
+  
+  # pull out matrix
+  group_otus <- as(otu_table(group_phy), "matrix")
+  
+  return(group_otus)
+}
+
+
+# plot heatmap with standard clustering/ordering
+troph_otus <- merge_by_group(MM_16S_phy, "trophic")
+
+troph_otus <- decostand(troph_otus, method = "pa")
+
+# pdf(file  = "outputs/heatmap/clustered_nested_heatmap.pdf", width = 7, height = 5)
+# pheatmap(troph_otus,
+#          border_color = NA)
+# dev.off()
+
+# count samples per trophic level
+meta <- as.data.table( as(sample_data(MM_16S_phy), "matrix"))
+otus <- transpose(as.data.table( as(otu_table(MM_16S_phy), "matrix")),
+                  keep.names = "sequencing_id")
+
+meta[, .N, by = trophic]
+
+# reorder matrix by trophic levels
+trophic_order <- c("Environmental",
+                   "PrimaryProducer",
+                   "Consumer")
+
+troph_otus <- troph_otus[trophic_order, ]
+troph_otus[1:3,1:5]
+
+# count how many samples each OTU is in
+spread_scores <- colSums(troph_otus)
+
+# assign each OTU a weighted score based on its presence in different trophic levels
+# lower trophic levels get a higher score to give figure a right-aligned nested structure
+
+rank_scores <- apply(troph_otus, MARGIN = 2, function(x) sum(x * rev(seq_along(x)) ) )
+
+composite_score <- data.table(OTU_ID = names(spread_scores),
+                              spread_score = spread_scores,
+                              rank_score = rank_scores)
+
+composite_score <- composite_score[order(rank_score, spread_score)]
+otu_order <- composite_score$OTU_ID
+
+troph_otus <-troph_otus[, otu_order]
+
+
+pdf(file  = "outputs/heatmap/ordered_nestedness_heatmap.pdf", width = 7, height = 4)
+par(mar = c(5,4,4,4))
+heatmap(troph_otus,
+        Colv = NA,
+        Rowv = NA,
+        labCol = NA)
+dev.off()
+
+
+
+
+```
+
+# group by site and do nestedness heatmap again
+
+```{r}
+
+site_otus <- merge_by_group(MM_16S_phy, "site_name")
+site_otus <- decostand(site_otus, method = "pa")
+
+
+heatmap(site_otus)
+
+grad_otus <- site_otus[c("Beach", "Estuary","Entrance","Confluence","Waterfall","DrumRoad","Ridge"),]
+heatmap(grad_otus)
+
+# count how many samples each OTU is in
+spread_scores <- colSums(grad_otus)
+
+# assign each OTU a weighted score based on its presence in different trophic levels
+# lower trophic levels get a higher score to give figure a right-aligned nested structure
+
+rank_scores <- apply(grad_otus, MARGIN = 2, function(x) sum(x * rev(seq_along(x)) ) )
+
+composite_score <- data.table(OTU_ID = names(spread_scores),
+                              spread_score = spread_scores,
+                              rank_score = rank_scores)
+
+composite_score <- composite_score[order(rank_score, spread_score)]
+otu_order <- composite_score$OTU_ID
+
+grad_otus <-grad_otus[, otu_order]
+
+
+pdf(file  = "outputs/heatmap/site_nestedness_heatmap.pdf", width = 7, height = 4)
+Heatmap(grad_otus,
+        cluster_rows = F,
+        cluster_columns = F,
+        show_column_names = F)
+barplot(rowSums(grad_otus), horiz = T, names.arg = "")
+dev.off()
+
+par(mfrow = c(2,1))
+barplot(rowSums(grad_otus))
+barplot(site_counts$N, names.arg = site_counts$site_name)
+
+```
+
+
+
+# Let's try ComplexHeatmap
+
+```{r}
+complex_heatmap <-
+  function(group,
+           metadata_column,
+           otus = all_otus,
+           meta = all_meta,
+           tax = all_tax,
+           zscale = T,
+           row_names = T,
+           description = NULL)   {
+    # group = "Marine"
+    # metadata_column = "habitat"
+    #     otus = all_otus
+    #        meta = all_meta
+    #        tax = all_tax
+    #        zscale = T
+    #        description = NULL
+    
+    # filter metadata where selected metadata column matches the group
+    group_meta <- all_meta[all_meta[[metadata_column]] %in% group,]
+    
+    # subset otus to match metadata
+    group_otus <-
+      otus[match(group_meta$sequencing_id, row.names(otus)),]
+    group_otus <-
+      group_otus[rowSums(group_otus) > 0, colSums(group_otus) > 0]
+    
+    # subset taxonomy to match otus
+    group_tax <- tax[match(colnames(group_otus), tax$asv_name),]
+    
+    # update row names to include sample types
+    new_names <-
+      paste(group_meta$sequencing_id,
+            group_meta$sample_type, sep = "_")
+    
+    row.names(group_otus) <- new_names
+    
+    
+    # construct heatmap annotation
+    ## EMP ontology categorical annotation and ASV topics barplot
+    ha_row <- rowAnnotation(
+      EMPO_3 = group_meta$empo_3,
+      EMPO_2 = group_meta$empo_2,
+      EMPO_1 = group_meta$empo_1,
+      Habitat = group_meta$habitat,
+      col = list(Habitat = emp_colors,
+                 EMPO_1  = emp_colors,
+                 EMPO_2  = emp_colors,
+                 EMPO_3  = emp_colors)
+    )
+    
+    # # Uncomment for bacterial Phylum annotations
+    # ha_col <- columnAnnotation(
+    #   Phylum = group_tax$phylum
+    # )
+    # 
+    
+    # create custom dendrogram with bray distance and sort it to better show close relationships
+    row_dist <- vegdist(group_otus, method = "bray")
+    row_clust <- hclust(row_dist , method = "average")
+    row_dendro <- dendsort(as.dendrogram(row_clust))
+    
+    # scale ASV abundance for plot visualization
+    if(isTRUE(zscale)){
+      group_otus <- scale(group_otus)
+    }
+    
+    # define color function
+    col_fun = colorRamp2(breaks = c(-1,0,1,10), viridis(4))
+    
+    # contruct heatmap
+    ht <- Heatmap(
+      group_otus,
+      col = col_fun,
+      border = T,
+      heatmap_legend_param = list(title = "Scaled Rel. Abund"),
+      
+      show_column_dend = F,
+      show_row_dend = F,
+      
+      cluster_rows = row_dendro,
+    
+      show_column_names =  F,
+      show_row_names = row_names,
+      
+      #top_annotation =  ha_col,
+      left_annotation = ha_row,
+      
+      row_names_gp = gpar(fontsize = 3)
+    )
+    
+    # return heatmap object
+    return(ht)
+    
+  }
+
+
+```
+
+Run the heatmap function on each habitat
+
+```{r}
+hab_hts <- lapply(habitat_list,
+                  complex_heatmap,
+                  metadata_column = "habitat")
+
+for( i in seq_along(habitat_list) ){
+    #plot as PDF file
+    pdf(
+      paste0(
+        "outputs/heatmap/",
+        habitat_list[i],
+        "_heatmap.pdf"
+      ),
+      width = 15,
+      height = 20
+    )
+  
+  print(hab_hts[i])
+  
+  dev.off()
+  
+}
+
+```
+
+
+Run the heatmap function on each habitat, with presence absence transformation
+```{r}
+
+pa_hab_hts <- lapply(habitat_list,
+                  complex_heatmap,
+                  metadata_column = "habitat",
+                  otus = decostand(all_otus, "pa"),
+                  zscale= F)
+
+for( i in seq_along(habitat_list) ){
+    #plot as PDF file
+    pdf(
+      paste0(
+        "outputs/heatmap/pa_",
+        habitat_list[i],
+        "_heatmap.pdf"
+      ),
+      width = 15,
+      height = 20
+    )
+  
+  print(pa_hab_hts[i])
+  
+  dev.off()
+  
+}
+```
+
+
+Run the heatmap function on all samples
+
+```{r}
+# z-scaled
+all_hts <- complex_heatmap(group = "bacterial16S",
+                           metadata_column = "locus",
+                           row_names = F)
+saveRDS(all_hts, "../data/processed/all_hts.rds")
+pdf("outputs/heatmap/all_sample_heatmap.pdf",
+      width = 8.5,
+      height = 10)
+  
+  print(all_hts)
+  
+dev.off()
+  
+  
+```
+

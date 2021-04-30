@@ -1,0 +1,19 @@
+# plot elevation data table in ggplot
+]0;/home/sean/Documents/Bioinformatics/Projects/Waimea/Hiseqs_Redux/barcodes/bcodes_backup/check_sequence_idsean@sean:~/Documents/Bioinformatics/Projects/Waimea/Hiseqs_Redux/barcodes/bcodes_backup/check_sequence_id$ # plot elevation data table in ggplot
+]0;/home/sean/Documents/Bioinformatics/Projects/Waimea/Hiseqs_Redux/barcodes/bcodes_backup/check_sequence_idsean@sean:~/Documents/Bioinformatics/Projects/Waimea/Hiseqs_Redux/barcodes/bcodes_backup/check_sequence_id$ bash: /home/sean/.bash_profile: line 2: unexpected EOF while looking for matching `"'
+bash: /home/sean/.bash_profile: line 3: syntax error: unexpected end of file
+[Ksean@sean:~/Documents/Bioinformatics/Projects/Waimea/Hiseqs_Redux/barcodes/bcodes_backup/check_sequence_id$ cd ../
+]0;/home/sean/Documents/Bioinformatics/Projects/Waimea/Hiseqs_Redux/barcodes/bcodes_backupsean@sean:~/Documents/Bioinformatics/Projects/Waimea/Hiseqs_Redux/barcodes/bcodes_backup$ ls
+all_samplesizes.csv  hiseq01_16S_barcodes.csv  hiseq01_ITS_barcodes_rev.csv  hiseq02_ITS_barcodes.csv	   hiseq03_16S_barcodes.csv  hiseq03_ITS_barcodes_rev.csv
+check_sequence_id    hiseq01_ITS_barcodes.csv  hiseq02_16S_barcodes.csv      hiseq02_ITS_barcodes_rev.csv  hiseq03_ITS_barcodes.csv  march_bcodes
+]0;/home/sean/Documents/Bioinformatics/Projects/Waimea/Hiseqs_Redux/barcodes/bcodes_backupsean@sean:~/Documents/Bioinformatics/Projects/Waimea/Hiseqs_Redux/barcodes/bcodes_backup$ cd ^V[K[K[Kd ../../../
+16Sglobal/         actual_maps/       Archive/           Hiseqs_Redux/      microbial_mapping/ toy_data/          
+sean@sean:~/Documents/Bioinformatics/Projects/Waimea/Hiseqs_Redux/barcodes/bcodes_backup$ cd ../../../microbial_mapping/
+]0;/home/sean/Documents/Bioinformatics/Projects/Waimea/microbial_mappingsean@sean:~/Documents/Bioinformatics/Projects/Waimea/microbial_mapping$ ls
+data  main  outputs  README.md	src
+]0;/home/sean/Documents/Bioinformatics/Projects/Waimea/microbial_mappingsean@sean:~/Documents/Bioinformatics/Projects/Waimea/microbial_mapping$ cd m[Koutputs/
+]0;/home/sean/Documents/Bioinformatics/Projects/Waimea/microbial_mapping/outputssean@sean:~/Documents/Bioinformatics/Projects/Waimea/microbial_mapping/outputs$ cd figures/
+]0;/home/sean/Documents/Bioinformatics/Projects/Waimea/microbial_mapping/outputs/figuressean@sean:~/Documents/Bioinformatics/Projects/Waimea/microbial_mapping/outputs/figures$ ls
+maps  nmds  summary
+]0;/home/sean/Documents/Bioinformatics/Projects/Waimea/microbial_mapping/outputs/figuressean@sean:~/Documents/Bioinformatics/Projects/Waimea/microbial_mapping/outputs/figures$ mkdir rarefaction
+]0;/home/sean/Documents/Bioinformatics/Projects/Waimea/microbial_mapping/outputs/figuressean@sean:~/Documents/Bioinformatics/Projects/Waimea/microbial_mapping/outputs/figures$ hto[K[K[K

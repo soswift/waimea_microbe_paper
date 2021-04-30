@@ -1,0 +1,47 @@
+"0","hab_hts <- lapply(habitat_list,"
+"0","                  complex_heatmap,"
+"0","                  metadata_column = ""habitat"")"
+"2","`use_raster` is automatically set to TRUE for a matrix with more than 2000 columns You can control `use_raster` argument by
+explicitly setting TRUE/FALSE to it.
+
+Set `ht_opt$message = FALSE` to turn off this message.
+"
+"2","`use_raster` is automatically set to TRUE for a matrix with more than 2000 columns You can control `use_raster` argument by
+explicitly setting TRUE/FALSE to it.
+
+Set `ht_opt$message = FALSE` to turn off this message.
+"
+"2","`use_raster` is automatically set to TRUE for a matrix with more than 2000 columns You can control `use_raster` argument by
+explicitly setting TRUE/FALSE to it.
+
+Set `ht_opt$message = FALSE` to turn off this message.
+"
+"0","for( i in seq_along(habitat_list) ){"
+"0","    #plot as PDF file"
+"0","    pdf("
+"0","      paste0("
+"0","        ""outputs/heatmap/"","
+"0","        habitat_list[i],"
+"0","        ""_heatmap.pdf"""
+"0","      ),"
+"0","      width = 15,"
+"0","      height = 20"
+"0","    )"
+"0","  "
+"0","  print(hab_hts[i])"
+"0","  "
+"0","  dev.off()"
+"0","  "
+"0","}"
+"1","[[1]]
+"
+"1","
+"
+"1","[[1]]
+"
+"1","
+"
+"1","[[1]]
+"
+"1","
+"

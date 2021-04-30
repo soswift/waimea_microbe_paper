@@ -1,0 +1,7 @@
+"0","# save plots"
+"0","names(trophic_plots) <- trophic_types"
+"0","for(i in names(trophic_plots)){"
+"0","  ggsave(filename = paste(""../outputs/figures/nmds/trpohic_"", i,""_nmds.pdf"", sep = """"), plot = trophic_plots[[i]])"
+"0","}"
+"2","Saving 7.29 x 4.5 in image
+"

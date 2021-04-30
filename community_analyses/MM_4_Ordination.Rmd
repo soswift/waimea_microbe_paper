@@ -1,0 +1,442 @@
+---
+title: "Microbial Mapping - 16S NMDS"
+output:
+  html_document:
+    df_print: paged
+---
+# Document Summary
+This code is for generating figures related to the actual sequencing data from the waimea hiseq data sets.
+first and foremost, the goal is to generate a variety of nmds plots to visualize braod trends in the data.
+
+
+## Set Up Environment
+Set a standardized color palettes for plotting and load libraries
+
+```{r}
+library(ggplot2)
+library(ggpubr)
+library(phyloseq)
+library(data.table)
+library(viridisLite)
+library(vegan)
+library(RVAideMemoire)
+
+set.seed(seed = 2020)
+
+# set output directory
+out_dir <- file.path("outputs","nmds")
+
+# source function for retrieving waimea color palette
+source("../src/get_colors.R")
+
+# set ggplot theme
+theme_set(theme_bw())
+
+# get color palettes 
+
+trophic_colors <- get_waimea_colors(cat_type = "trophic")
+habitat_colors <- get_waimea_colors(cat_type = "habitat")
+emp_colors     <- get_waimea_colors(cat_type = "emp")
+
+# set log transformed color palette for gradient values (e.g. elevation)
+pal_c = "plasma"
+uniform_gradient_color <- function(palname = pal_c, ...){
+  scale_color_viridis_c(option = palname, trans = "log", ...)
+}
+
+
+```
+
+  
+## Read in phyloseq object
+```{r}
+MM_16S_phy <- readRDS("../data/processed/cleaned/MM_16S_phy.rds")
+
+MM_16S_phy
+
+meta <- as(as(sample_data(MM_16S_phy), "data.frame"), "data.table")
+
+# summarize sampling effort by site
+sample_number_by_site <- meta[,
+                              .N,
+                              by = .(site_name, habitat)][order(site_name, habitat)]
+
+fwrite(sample_number_by_site, "../data/processed/interim/sample_number_by_site.csv")
+
+sample_number_by_site
+
+```
+
+
+## Permanova
+
+Run a permanova looking at two way interactions between EMP ontology level 3, collection location, and habitat
+
+```{r}
+
+metadata <- as(sample_data(MM_16S_phy), "data.frame")
+
+all_dist <- distance(MM_16S_phy, method="bray")
+
+# All sites & samples included
+# run permanovas using type 2 sum of squares (adonis.II)
+perm_aovs <- list()
+
+perm_aovs$empo_3  <- adonis.II(all_dist ~ empo_3, data = metadata)
+perm_aovs$trophic <- adonis.II(all_dist ~ trophic, data = metadata)
+perm_aovs$habitat <- adonis.II(all_dist ~ habitat, data = metadata)
+perm_aovs$site_code <- adonis.II(all_dist ~ site_code, data = metadata)
+
+# Only gradient sites (i.e. no marine samples)
+grad_phy  <- subset_samples(MM_16S_phy, habitat !="Marine")
+grad_data <- as(sample_data(grad_phy), "data.frame")
+grad_dist <- distance(grad_phy, method = "bray")
+
+perm_aovs$grad_empo_3  <- adonis.II(grad_dist ~ empo_3, data = grad_data)
+perm_aovs$grad_trophic <- adonis.II(grad_dist ~ trophic, data = grad_data)
+perm_aovs$grad_habitat <- adonis.II(grad_dist ~ habitat, data = grad_data)
+perm_aovs$grad_site_code <- adonis.II(grad_dist ~ site_code, data = grad_data)
+
+# convert to data.frame
+perm_aovs_df <- do.call("rbind", perm_aovs)
+perm_aovs_df <- data.frame(perm_aovs_df)
+
+# calculate R-squared values
+perm_aovs_df$R2  <-
+  perm_aovs_df$Sum.Sq / perm_aovs_df$Sum.Sq[nrow(perm_aovs_df)]
+
+#write out
+write.csv(perm_aovs_df, 
+          "outputs/permanova/single_variable_permanovas.csv",
+          row.names = T)
+
+# Multi factor permanova on all sites
+permanova_output <- adonis.II(all_dist ~  trophic + site_code + habitat+ # main effects
+                                          trophic:site_code+trophic:habitat+habitat:site_code, # interactions
+                          data = metadata,
+                          parallel = 2,
+                          permutations = 1000
+                          )
+
+
+# calculate R-squared values
+permanova_output <- data.frame(permanova_output)
+permanova_output$R2  <-
+  permanova_output$Sum.Sq / permanova_output$Sum.Sq[nrow(permanova_output)]
+
+# write out
+saveRDS(permanova_output,
+        "../data/processed/interim/permanova_output.rds")
+write.csv(permanova_output,
+           "outputs/permanova/all_trophic_site_habitat_permanova_table.csv")
+
+# Multi factor permanova on gradient sites
+
+grad_permanova_output <- adonis.II(grad_dist ~  empo_3 + site_code + habitat + # main effets 
+                                                 empo_3:site_code+ empo_3:habitat + habitat:site_code , #interactoins
+                          data = grad_data,
+                          parallel = 2,
+                          permutations = 1000
+                          )
+
+# calculate R-squared values
+grad_permanova_output <- data.frame(grad_permanova_output)
+grad_permanova_output$R2  <-
+  grad_permanova_output$Sum.Sq / grad_permanova_output$Sum.Sq[nrow(grad_permanova_output)]
+
+
+# write out
+saveRDS(grad_permanova_output,
+        "../data/processed/interim/grad_permanova_output.rds")
+write.csv(grad_permanova_output,
+           "outputs/permanova/grad_emp3_site_trophic_habitat_permanova_table.csv")
+
+
+# calculate betadispersion for the three factors being considered
+# this helps us intepret permanova results as composition or dispersion based
+beta_disps <- list()
+
+for(a_factor in c("empo_3","trophic", "site_code","habitat")){
+
+  # all sites (marine included)
+factor_groups <- metadata[match(labels(all_dist),
+                                  metadata$sequencing_id), 
+                            a_factor]
+beta_disps[[a_factor]] <- betadisper(all_dist, factor_groups)
+
+ # gradient sites
+factor_groups <- grad_data[match(labels(grad_dist),
+                                  grad_data$sequencing_id), 
+                            a_factor]
+beta_disps[[paste0("grad_",a_factor)]] <- betadisper(grad_dist, factor_groups)
+
+}
+
+capture.output(print(beta_disps), file = "outputs/permanova/emp3_betadisp_table.txt")
+
+
+
+```
+
+
+## all sample nmds
+run nmds on all samples, except controls
+
+### Ordinate
+
+```{r}
+
+# subset to remove controls (no metadata in the host column)
+nsamples(MM_16S_phy)
+
+MM_16S_phy <- subset_samples(MM_16S_phy, host != "")
+
+# simplify trophic levels to Environmental, PrimaryProducer, and Consumer
+sample_data(MM_16S_phy)$trophic[!(sample_data(MM_16S_phy)$trophic %in%
+                                    c("Environmental", "PrimaryProducer"))] <- "Consumer"
+
+# ordinate all phyloseq object  
+set.seed(2020)
+
+MM.ord <- ordinate(physeq = MM_16S_phy,
+                   method =  "NMDS",
+                   distance = "bray")
+saveRDS(MM.ord, "../data/processed/all_sample_ordinations.rds")
+
+
+```
+
+### Plot Ordinations
+
+```{r}
+MM.ord <- readRDS("../data/processed/all_sample_ordinations.rds")
+
+# 1) plot all samples colored by habitat
+p1 <-
+  plot_ordination(MM_16S_phy,
+                  MM.ord,
+                  type = "samples",
+                  color = "habitat",
+                  shape = "empo_2")
+
+p1 <- ggplot(data = p1$data, mapping = p1$mapping) +
+        scale_shape_discrete(solid = T) +
+        # adjust point transparency and size
+        geom_point( size = 2,
+                    alpha = 0.7)+ 
+        # use standardized habitat colors
+        scale_color_manual(values = habitat_colors,
+                           drop = F) +
+        ggtitle("Habitat") 
+p1
+
+ggsave(file.path(out_dir, "all_samples_habitat_nmds.pdf"))
+
+# 2) plot by all samples colored by trophic level
+p2 <-
+  plot_ordination(MM_16S_phy,
+                  MM.ord,
+                  type = "samples",
+                  color = "trophic",
+                  shape = "empo_2")
+
+p2 <- ggplot(p2$data, p2$mapping) +
+        scale_shape_discrete(solid = T) +
+        scale_color_manual(values = trophic_colors)+
+        geom_point( size = 2, alpha = 0.7)+
+  ggtitle("Trophic")
+p2
+
+ggsave(file.path(out_dir, "all_samples_trophic_nmds.pdf"))
+
+# plot all samples colored by gradient  
+p3 <-
+  plot_ordination(MM_16S_phy,
+                  MM.ord,
+                  type = "samples",
+                  color = "elevation",
+                  shape = "habitat") +
+  scale_shape_discrete(solid = T)  +
+  uniform_gradient_color()  +
+  ggtitle("Elevation")
+p3
+
+ggsave(file.path(out_dir, "all_samples_elevation_nmds.pdf"))
+
+
+# plot by empo
+p4 <-
+  plot_ordination(MM_16S_phy,
+                  MM.ord,
+                  type = "samples",
+                  color = "empo_1",
+                  shape = "habitat")+
+  scale_shape_discrete(solid = T) +
+  scale_color_manual(values = emp_colors)+
+  ggtitle("EMPO 1")
+p4
+ggsave(file.path(out_dir, "all_samples_empo1_nmds.pdf"))
+
+
+p5 <-
+  plot_ordination(MM_16S_phy,
+                  MM.ord,
+                  type = "samples",
+                  color = "empo_2",
+                  shape = "habitat") +
+  scale_shape_discrete(solid = T) +
+  scale_color_manual(values = emp_colors)+
+  
+  ggtitle("EMPO 2")
+p5
+ggsave(file.path(out_dir, "all_samples_empo2_nmds.pdf"))
+
+p6 <-
+    plot_ordination(MM_16S_phy,
+                  MM.ord,
+                  type = "samples",
+                  color = "site_name",
+                  shape = "habitat") +
+  scale_shape_discrete(solid = T) 
+  
+  ggtitle("Site")
+p6
+ggsave(file.path(out_dir, "all_samples_site_nmds.pdf"))
+
+# convert plot to grob
+nmds_grobs <-lapply(list(p1,p2,p3,p4,p5,p6), ggplotGrob)
+
+# set a standard width for all grobs
+std_width <- nmds_grobs[[1]]$widths
+nmds_std <- lapply(nmds_grobs, function(x) {
+                  x$widths <- std_width
+                  return(x)})
+# arrange ordinations
+g <- ggarrange(plotlist=nmds_std,
+                nrow = 3, ncol = 2)
+
+
+ggsave(paste0("outputs/nmds/all_samples_facet_NMDS.pdf"),
+       plot = g, 
+       width = 12,
+       height = 14)
+
+
+```
+
+## Subsets
+### by habitat
+split up data by habitat and run nmds colored by trophic level for all samples
+
+```{r}
+
+# list of unique habitats
+habitat_types <- unique(MM_16S_phy@sam_data$habitat)
+
+# function to subset and ordinate each habitat type
+ordinate_habitat <- function(x){
+  ## TEST
+  ## x = habitat_types[1]
+ 
+  # superassign
+  hab <<- x
+  
+  # subset and ordinate
+  MM_sub <- subset_samples(MM_16S_phy, habitat == hab)
+  MM.ord <- ordinate(MM_sub, "NMDS", "bray")
+  
+  #plot
+  p <- plot_ordination(MM_sub, MM.ord,
+                       type="samples",
+                       color = "trophic",
+                       shape = "empo_2",
+                       title= paste("NMDS, Bray,", hab))
+  p <- p +
+    scale_shape_discrete(solid = T)+
+    scale_color_manual(values = trophic_colors)+
+    coord_fixed(ratio = 1)
+  
+  # calculate permanova
+  # adonis_out <- adonis.II(distance(MM_sub, method = "bray") ~ empo_3 ,data = as(sample_data(MM_sub), "data.frame"))
+  # write.csv(adonis_out, file = paste0("outputs/permanova/permanova_",hab,"_summary.csv"))
+  # return(list(p, adonis_out))
+  return(p)
+}
+
+# run function
+habitat_plots <- lapply(habitat_types, ordinate_habitat)
+
+# display plots
+habitat_plots
+
+# save individual plots
+names(habitat_plots) <- habitat_types
+
+for(i in names(habitat_plots)){
+  ggsave(filename = file.path(out_dir, paste0("habitat_", i,"_nmds.pdf", sep = "")),
+         plot = habitat_plots[[i]])#[[1]])
+}
+
+# facet habitat plots into single figure
+habitat_facet <- ggarrange(habitat_plots[[1]][1], habitat_plots[[2]][1], habitat_plots[[3]][1], ncol = 3, nrow = 1)
+
+habitat_facet
+
+ggsave(filename = file.path(out_dir, "habitat_facet_nmds.pdf"), 
+       plot = habitat_facet,
+       width = 15)
+
+# write out adonis outputs
+capture.output(
+  for(i in names(habitat_plots)){
+   
+    anova_out <- habitat_plots[[i]][[2]]
+    r_sq <- anova_out$`Sum Sq`[1] / anova_out$`Sum Sq`[3]
+    
+    print(i)
+    print(anova_out)
+    print(paste0("R2 = ", r_sq))
+  },
+  file = "outputs/permanova/by_habitat_emp3_permanova.txt")
+
+
+
+```
+
+### by trophic level
+```{r}
+
+# list of unique trophic levels
+trophic_types <- unique(MM_16S_phy@sam_data$trophic)
+
+# function to subset and ordinate each trophic level
+ordinate_troph <- function(x){
+  
+  # superassign variable to make it accessible to phyloseq commands
+  troph <<- x
+  
+  # subset and ordinate
+  MM_sub <- subset_samples(MM_16S_phy, trophic == troph)
+  MM.ord <- ordinate(MM_sub, "NMDS", "bray")
+  
+  #plot
+  p <- plot_ordination(MM_sub, MM.ord, type="samples", color = "elevation", shape = "habitat", title= paste("NMDS, Bray,", troph))  +
+    uniform_gradient_color()+
+    scale_shape_discrete(solid = T)
+  return(p)
+}
+
+# run function
+trophic_plots <- lapply(trophic_types, ordinate_troph)
+
+# display plots
+trophic_plots
+
+# save plots
+names(trophic_plots) <- trophic_types
+
+for(i in names(trophic_plots)){
+  ggsave(filename = paste("../outputs/figures/nmds/trophic_", i,"_nmds.pdf", sep = ""), plot = trophic_plots[[i]])
+}
+
+```

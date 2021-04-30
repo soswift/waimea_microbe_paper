@@ -1,0 +1,7 @@
+"0","for(i in names(habitat_plots)){
+  ggsave(filename = file.path(out_dir, paste0(""habitat_"", i,""_nmds.pdf"", sep = """")),
+         plot = habitat_plots[[i]])#[[1]])
+}
+"
+"2","Saving 7 x 7 in image
+"
