@@ -1,0 +1,21 @@
+habitat	trophic	empo3
+Terrestrial	Consumer	Terrestrial Animal corpus
+Terrestrial	Environmental	Terrestrial Aerosol (ns)
+Marine	Environmental	Marine Water (s)
+Riverine	Consumer	Riverine Animal corpus
+Terrestrial	Consumer	Terrestrial Animal distal gut
+Terrestrial	PrimaryProducer	Terrestrial Plant corpus
+Riverine	PrimaryProducer	Riverine Plant corpus
+Marine	Consumer	Marine Animal corpus
+Terrestrial	Consumer	Terrestrial Fungus corpus
+Terrestrial	PrimaryProducer	Terrestrial Plant surface
+Marine	PrimaryProducer	Marine Plant corpus
+Terrestrial	Consumer	Terrestrial Animal surface
+Riverine	Environmental	Riverine Surface (ns)
+Marine	Environmental	Marine Surface (s)
+Terrestrial	Environmental	Terrestrial Surface (ns)
+Terrestrial	Environmental	Terrestrial Soil (ns)
+Terrestrial	PrimaryProducer	Terrestrial Plant rhizosphere
+Riverine	Environmental	Riverine Water (ns)
+Marine	Environmental	Marine Sediment (s)
+Riverine	Environmental	Riverine Sediment (ns)
