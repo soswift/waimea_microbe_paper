@@ -1,0 +1,59 @@
+******************************************************************
+Family:  c("BEINF1", "Beta Inflated one") 
+
+Call:  
+gamlss(formula = beta ~ dist2beachlog10 * isConsumer + dist2beachlog10 *  
+    isPrimaryProducer, sigma.formula = ~dist2beachlog10 * isConsumer +  
+    dist2beachlog10 * isPrimaryProducer, nu.formula = ~trophic,  
+    family = "BEINF1", data = na.omit(plotdf), control = g_control_sett,  
+    i.control = i_control_sett) 
+
+Fitting method: RS() 
+
+------------------------------------------------------------------
+Mu link function:  logit
+Mu Coefficients:
+                                      Estimate Std. Error t value Pr(>|t|)    
+(Intercept)                            3.95590    0.01592 248.474  < 2e-16 ***
+dist2beachlog10                       -0.98377    0.03082 -31.918  < 2e-16 ***
+isConsumerTRUE                        -0.15326    0.02117  -7.241 4.83e-13 ***
+isPrimaryProducerTRUE                  1.08869    0.04522  24.078  < 2e-16 ***
+dist2beachlog10:isConsumerTRUE         1.31623    0.04079  32.267  < 2e-16 ***
+dist2beachlog10:isPrimaryProducerTRUE -0.58759    0.08074  -7.277 3.70e-13 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+------------------------------------------------------------------
+Sigma link function:  logit
+Sigma Coefficients:
+                                      Estimate Std. Error  t value Pr(>|t|)    
+(Intercept)                           -1.91637    0.01486 -128.970  < 2e-16 ***
+dist2beachlog10                        0.61761    0.02900   21.299  < 2e-16 ***
+isConsumerTRUE                         0.71309    0.01812   39.362  < 2e-16 ***
+isPrimaryProducerTRUE                 -0.38584    0.03686  -10.466  < 2e-16 ***
+dist2beachlog10:isConsumerTRUE        -0.96735    0.03518  -27.494  < 2e-16 ***
+dist2beachlog10:isPrimaryProducerTRUE  0.30727    0.06767    4.541 5.68e-06 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+------------------------------------------------------------------
+Nu link function:  log 
+Nu Coefficients:
+                         Estimate Std. Error t value Pr(>|t|)    
+(Intercept)              -2.21728    0.04613 -48.061  < 2e-16 ***
+trophicEnvironmental    -23.74941 1962.29377  -0.012     0.99    
+trophicPrimaryProducer   -1.79005    0.26459  -6.765 1.41e-11 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+------------------------------------------------------------------
+No. of observations in the fit:  8742 
+Degrees of Freedom for the fit:  15
+      Residual Deg. of Freedom:  8727 
+                      at cycle:  24 
+ 
+Global Deviance:     -48113.74 
+            AIC:     -48083.74 
+            SBC:     -47977.6 
+******************************************************************
+[1] 0.2275894

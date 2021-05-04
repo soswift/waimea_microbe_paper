@@ -1,0 +1,14 @@
+note: h2_nodf_nulls not used.
+
+using bipartite::vaznull or similar in vegan:: would take until the heat death
+of the universe to finish running. 
+
+I wrote  C++ implementations of vaznull and NODF in that folder, and they
+work pretty well but I didn't have time to thoroughly vet them.
+
+
+
+raw_count_empo_3_agg_habitat_nest_boxplot.pdf is the output of the nestedness
+analyses done by Sean, used in Figure 2.
+
+-JLD

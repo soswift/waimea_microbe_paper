@@ -1,0 +1,129 @@
+env loaded and compiled.
+H2 funs defined.
+1/21; Marine; OutsideOcean
+...mat setup
+...emp H2+NODF calculated
+...made sims
+...sim H2 calculated
+...sim NODF calculated
+2/21; Marine; OutsideRocks
+...mat setup
+...emp H2+NODF calculated
+...made sims
+...sim H2 calculated
+...sim NODF calculated
+3/21; Marine; SharksCove
+...mat setup
+...emp H2+NODF calculated
+...made sims
+...sim H2 calculated
+...sim NODF calculated
+4/21; Marine; ThreeTablesBeach
+...mat setup
+...emp H2+NODF calculated
+...made sims
+...sim H2 calculated
+...sim NODF calculated
+5/21; Marine; TwinRocks
+...mat setup
+...emp H2+NODF calculated
+...made sims
+...sim H2 calculated
+...sim NODF calculated
+6/21; Marine; UppersBeach
+...mat setup
+...emp H2+NODF calculated
+...made sims
+...sim H2 calculated
+...sim NODF calculated
+7/21; Marine; WaimeaBay
+...mat setup
+...emp H2+NODF calculated
+...made sims
+...sim H2 calculated
+...sim NODF calculated
+8/21; Riverine; Beach
+...mat setup
+...emp H2+NODF calculated
+...made sims
+...sim H2 calculated
+...sim NODF calculated
+9/21; Riverine; Confluence
+...mat setup
+...emp H2+NODF calculated
+...made sims
+...sim H2 calculated
+...sim NODF calculated
+10/21; Riverine; DrumRoad
+...mat setup
+...emp H2+NODF calculated
+...made sims
+...sim H2 calculated
+...sim NODF calculated
+11/21; Riverine; Entrance
+...mat setup
+...emp H2+NODF calculated
+...made sims
+...sim H2 calculated
+...sim NODF calculated
+12/21; Riverine; Estuary
+...mat setup
+...emp H2+NODF calculated
+...made sims
+...sim H2 calculated
+...sim NODF calculated
+13/21; Riverine; Ridge
+...mat setup
+...emp H2+NODF calculated
+...made sims
+...sim H2 calculated
+...sim NODF calculated
+14/21; Riverine; Waterfall
+...mat setup
+...emp H2+NODF calculated
+...made sims
+...sim H2 calculated
+...sim NODF calculated
+15/21; Terrestrial; Beach
+...mat setup
+...emp H2+NODF calculated
+...made sims
+...sim H2 calculated
+...sim NODF calculated
+16/21; Terrestrial; Confluence
+...mat setup
+...emp H2+NODF calculated
+...made sims
+...sim H2 calculated
+...sim NODF calculated
+17/21; Terrestrial; DrumRoad
+...mat setup
+...emp H2+NODF calculated
+...made sims
+...sim H2 calculated
+...sim NODF calculated
+18/21; Terrestrial; Entrance
+...mat setup
+...emp H2+NODF calculated
+...made sims
+...sim H2 calculated
+...sim NODF calculated
+19/21; Terrestrial; Estuary
+...mat setup
+...emp H2+NODF calculated
+...made sims
+...sim H2 calculated
+...sim NODF calculated
+20/21; Terrestrial; Ridge
+...mat setup
+...emp H2+NODF calculated
+...made sims
+...sim H2 calculated
+...sim NODF calculated
+21/21; Terrestrial; Waterfall
+...mat setup
+...emp H2+NODF calculated
+...made sims
+...sim H2 calculated
+...sim NODF calculated
+Saved (all done)
