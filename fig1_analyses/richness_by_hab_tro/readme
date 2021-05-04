@@ -1,0 +1,3 @@
+rich.r creates ggdata_trophic_grouped.rdata,
+which is then plotted with trophic_grouped.r
+and is part of Figure 1.
