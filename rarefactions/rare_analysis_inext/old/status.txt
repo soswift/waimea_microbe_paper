@@ -1,0 +1,14 @@
+it's started!
+Next line better be TRUE (checking for metadata/otutable sort):
+[1] TRUE
+Data load and organization complete
+Functions defined
+...Marine/Consumer done
+...Marine/PrimaryProducer done
+...Marine/Environmental done
+...Riverine/PrimaryProducer done
+...Riverine/Consumer done
+...Riverine/Environmental done
+...Terrestrial/Environmental done
+...Terrestrial/PrimaryProducer done
+...Terrestrial/Consumer done

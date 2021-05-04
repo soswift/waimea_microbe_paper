@@ -1,0 +1,2 @@
+rare_funs_endos.r - functions to do rarefaction and make binned plot
+jld_rare.r - actually do it on the waimea data

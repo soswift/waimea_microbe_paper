@@ -1,0 +1,10 @@
+rare_analysis_inext:
+	uses inext R package to do chao1 prediction + interpolation
+	of "meta samples" i.e. all samples from "consumer" added together.
+
+rare_analysis_mm: michaelis menten fits for sample diversity accumulation
+	curves. A much more realistic understanding of what proportion of
+	diversity was sampled for a given hab or tro.
+
+rare_curves_jld_endosstyle: rarefaction curves per sample, binned as in
+	darcy et al. 2020 mol ecol
