@@ -6,8 +6,8 @@
 
 # read in data
   otutable_fp <- "../../data/topicdata/1000topics_sample_topics.csv"
-  metadata_fp <- "../../data/waimea_full/combined_prep_sample_metadata_16s.csv"
-  taxonomy_fp <- "../../data/waimea_full/annotations_100.taxonomy"
+  metadata_fp <- "../../data/raw/sequence/waimea_16S_v1/combined_prep_sample_metadata_16s.csv"
+  taxonomy_fp <- "../../data/raw/sequence/waimea_16S_v1/annotations_100.taxonomy"
   otutable <- read.delim(otutable_fp, sep=",", header=F, stringsAsFactors=FALSE)
   metadata <- read.delim(metadata_fp, sep=",", header=T, stringsAsFactors=FALSE)
   taxonomy <- read.delim(taxonomy_fp, sep="\t", header=T, stringsAsFactors=FALSE)
